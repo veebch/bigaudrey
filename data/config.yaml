@@ -1,0 +1,34 @@
+display:
+  inverted: false # If True, black background grey text
+  vcom: -2.11 # This is a number specific to your epd, ignore this unless you know what it does
+  xshift: 0 # Pixels to shift image for fine tuning alignment
+  yshift: 10 # Pixels to shift image for fine tuning alignment
+  updatefrequency: 300 # Seconds (lower limit is 60, to preserve epaper)
+function: # Functions that Audrey has, along with a weighting for each
+  - mode: ticker
+    weight: 1
+  - mode: redditquotes
+    weight: 0
+  - mode: wordaday
+    weight: 0
+  - mode: newyorkercartoon
+    weight: 0
+  - mode: headlines
+    weight: 0
+  - mode: textfilequotes
+    weight: 0
+  - mode: stoic
+    weight: 0
+ticker:
+  symbol: BTC-USD, ETH-USD, GOOGL
+  fiatcurrency: usd
+  symbols_per_page: 3 
+  maximalist: false # Maximalist mode. Only one symbol with a news feed item from url feedurl
+  feedurl: https://bitcoinmagazine.com/.rss/full/
+  symbol_show: false # Include symbol name on display
+  bold: false # Bolder display
+redditquotes:
+  quotesurl: https://www.reddit.com/r/quotes/top/.json?t=month&limit=100
+headlines:
+  feedurl: 'https://rss.nytimes.com/services/xml/rss/nyt/US.xml'
+  feedname: "New York Times"

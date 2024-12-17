@@ -1,0 +1,8 @@
+qrcode>=6.1
+feedparser>=6.0.8
+requests>=2.21.0
+pandas>=1.2.5
+gpiozero>=1.6.2
+Pillow>=9.3.0
+PyYAML>=5.4.1
+nh-currency>=1.0.1
