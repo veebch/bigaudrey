@@ -582,6 +582,8 @@ def beanaproblem(image, message):
     #   Message as QR code to improve error diagnosis
     return image
 
+import yfinance as yf
+import pandas as pd
 
 def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
     """
@@ -605,18 +607,23 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             data = ticker.history(period=period, interval=interval)
 
             if not data.empty:
-                # Get the latest live price
+                # Try getting live price from fast_info, fallback to info if None
                 live_price = ticker.fast_info.get('last_price')
-                print(f"Live price: {live_price}")
+
+                if live_price is None:  # Fallback method
+                    live_price = ticker.info.get('previousClose')  # Last known close price
+
+                print(f"Live price for {symbol}: {live_price}")  # Debugging trace
+
                 if live_price is not None:
                     # Create a DataFrame for the live price
                     live_data = pd.DataFrame({
-                        'Open': [None],  # No open price for live
-                        'High': [None],  # No high price for live
-                        'Low': [None],   # No low price for live
-                        'Close': [live_price],  # Current live price
-                        'Volume': [None]  # No live volume data
-                    }, index=[pd.Timestamp.now()])  # Timestamp for the live price
+                        'Open': [None],  
+                        'High': [None],  
+                        'Low': [None],   
+                        'Close': [live_price],  
+                        'Volume': [None]  
+                    }, index=[pd.Timestamp.now()])  
 
                     # Append live data to the historical DataFrame
                     data = pd.concat([data, live_data])
@@ -630,6 +637,15 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             data_with_live_prices[symbol] = pd.DataFrame()
 
     return data_with_live_prices
+
+# Example usage
+symbols = ["AAPL", "GOOGL", "MSFT"]
+result = get_historical_and_live_data(symbols, interval='1h', period='1mo')
+
+# Print last few rows of AAPL data (including the live price)
+print(result["AAPL"].tail())
+
+
 
 def create_all_prices_dataframe(data_with_live_prices, label, target_length=720):
     """
