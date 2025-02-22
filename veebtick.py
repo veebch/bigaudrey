@@ -648,12 +648,12 @@ def create_all_prices_dataframe(data_with_live_prices, label, target_length=720)
     """
     Create a DataFrame where each column is a symbol, and the rows are aligned by
     forward-filling to match the target length.
-
+    
     Args:
         data_with_live_prices (dict): Dictionary where keys are symbols and values are DataFrames.
         label (str): The column label to extract (e.g., 'Close', 'Volume').
         target_length (int): The desired number of rows for each symbol.
-
+        
     Returns:
         pd.DataFrame: DataFrame with symbols as columns and aligned rows.
     """
@@ -668,6 +668,10 @@ def create_all_prices_dataframe(data_with_live_prices, label, target_length=720)
             reindexed_series = series.reindex(pd.date_range(df.index.min(), periods=target_length, freq='h'))
             reindexed_series = reindexed_series.interpolate(method='time').ffill().bfill()
 
+            # Append the live price to the end of the reindexed series
+            live_price = df[label].iloc[-1]  # This is the last price from the historical data
+            reindexed_series.iloc[-1] = live_price  # Update the last value with the live price
+
             # Add to dictionary
             all_prices[symbol] = reindexed_series.tolist()
 
@@ -675,6 +679,7 @@ def create_all_prices_dataframe(data_with_live_prices, label, target_length=720)
     aligned_df = pd.DataFrame.from_dict(all_prices)
 
     return aligned_df
+
 
 
 def getData(config):
