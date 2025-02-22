@@ -1,12 +1,12 @@
 display:
   inverted: false # If True, black background grey text
-  vcom: -2.11 # This is a number specific to your epd, ignore this unless you know what it does
+  vcom: -2.47 # This is a number specific to your epd, ignore this unless you know what it does
   xshift: 0 # Pixels to shift image for fine tuning alignment
-  yshift: 10 # Pixels to shift image for fine tuning alignment
-  updatefrequency: 300 # Seconds (lower limit is 60, to preserve epaper)
+  yshift: -10 # Pixels to shift image for fine tuning alignment
+  updatefrequency: 300 # Seconds (lower limit is 60, to preserve epaper - If no data is returned, increase this to prevent throttling)
 function: # Functions that Audrey has, along with a weighting for each
   - mode: ticker
-    weight: 1
+    weight: 1 
   - mode: redditquotes
     weight: 0
   - mode: wordaday
@@ -14,7 +14,7 @@ function: # Functions that Audrey has, along with a weighting for each
   - mode: newyorkercartoon
     weight: 0
   - mode: headlines
-    weight: 0
+    weight: 0   
   - mode: textfilequotes
     weight: 0
   - mode: stoic
@@ -30,5 +30,5 @@ ticker:
 redditquotes:
   quotesurl: https://www.reddit.com/r/quotes/top/.json?t=month&limit=100
 headlines:
-  feedurl: 'https://rss.nytimes.com/services/xml/rss/nyt/US.xml'
-  feedname: "New York Times"
+  feedurl: 'https://newsfeed.zeit.de/index'
+  feedname: "Zeit.de"
