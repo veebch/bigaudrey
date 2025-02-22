@@ -46,7 +46,7 @@ A quote from stoic-quotes.com.
 
 # Configuration
 
-Once an internet connection is established. Big Audrey is on your LAN. you can either ssh in or point a webrowser at `bigaudrey.local:8080` to edit the config file.
+Once an internet connection is established. Big Audrey is on your LAN. To edit the config file you can either ssh (path: bigaudrey/data) in or point a webrowser at `bigaudrey.local:8080` to edit the config file.
 
 Edit the file config.yaml. Entries are commented to indicate their function. There are boolean values for activation of modes, as well as a function section that lists the functions that are sampled from on each refresh iteration. There is also a weighting of those samples. 
 
