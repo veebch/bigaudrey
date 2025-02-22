@@ -814,7 +814,7 @@ def updateDisplay(image, config, allprices, volumes):
     index = 0
     for key in allprices.keys():
         logging.info(str("Price: " + key))
-        pricenow = allprices[key]['Close'].iloc[-1]  # Get latest close price
+        pricenow = allprices[key][-1]  # Get latest close price
         fiat = fiat_list[index]
         if fiat == "jpy":
             symbolstring = "¥"
