@@ -607,7 +607,7 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             if not data.empty:
                 # Get the latest live price
                 live_price = ticker.fast_info.get('last_price', None)
-
+                logging.info(live_price)
                 if live_price is not None:
                     # Create a DataFrame for the live price
                     live_data = pd.DataFrame({
