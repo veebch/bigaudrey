@@ -607,10 +607,10 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             if not data.empty:
                 # Ensure the live price retrieval is robust
                 live_price = ticker.fast_info.get('last_price')
-
+                live_volume = ticker.history(period="1d", interval="1m")['Volume'].dropna().iloc[-1]
                 if live_price is None:  # Fallback method
                     live_price = ticker.info.get('previousClose')
-
+                    
                 print(f"Live price for {symbol}: {live_price}")  # Debugging trace
 
                 if live_price is not None:
@@ -626,7 +626,7 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
                         'High': [None],  
                         'Low': [None],   
                         'Close': [live_price],  
-                        'Volume': [None]  
+                        'Volume': [live_volume]  
                     }, index=[live_timestamp])  
 
                     # Append live data to the historical DataFrame
