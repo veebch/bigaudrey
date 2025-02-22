@@ -582,8 +582,6 @@ def beanaproblem(image, message):
     #   Message as QR code to improve error diagnosis
     return image
 
-import yfinance as yf
-import pandas as pd
 
 def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
     """
