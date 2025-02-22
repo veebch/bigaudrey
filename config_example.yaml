@@ -1,9 +1,3 @@
-display:
-  inverted: false # If True, black background grey text
-  vcom: -2.47 # This is a number specific to your epd, ignore this unless you know what it does
-  xshift: 0 # Pixels to shift image for fine tuning alignment
-  yshift: -10 # Pixels to shift image for fine tuning alignment
-  updatefrequency: 300 # Seconds (lower limit is 60, to preserve epaper - If no data is returned, increase this to prevent throttling)
 function: # Functions that Audrey has, along with a weighting for each
   - mode: ticker
     weight: 1 
@@ -19,6 +13,12 @@ function: # Functions that Audrey has, along with a weighting for each
     weight: 0
   - mode: stoic
     weight: 0
+display:
+  inverted: false # If True, black background grey text
+  vcom: -2.47 # This is a number specific to your epd, ignore this unless you know what it does
+  xshift: 0 # Pixels to shift image for fine tuning alignment
+  yshift: -10 # Pixels to shift image for fine tuning alignment
+  updatefrequency: 300 # Seconds (lower limit is 60, to preserve epaper - If no data is returned, increase this to prevent throttling)
 ticker:
   symbol: BTC-USD, ETH-USD, GOOGL
   fiatcurrency: usd
