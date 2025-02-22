@@ -62,9 +62,10 @@ quotesfile = os.path.join(
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
 }
+logging.basicConfig(level=logging.INFO)
 
 def display_gradient(display):
-    print('Displaying gradient...')
+    print('Displaying startup screen...')
     img = Image.new("RGB", (1448, 1072), color=(255, 255, 255))
     dims = (display.width, display.height)
     paste_coords = [
@@ -142,7 +143,7 @@ def wordaday(img, config):
         logging.info("get word a day")
         filename = os.path.join(dirname, "images/rabbitsq.png")
         imlogo = Image.open(filename)
-        resize = 300, 300
+        resize = 200, 200
         imlogo.thumbnail(resize)
         d = feedparser.parse("https://wordsmith.org/awad/rss1.xml")
         wad = d.entries[0].title
@@ -648,7 +649,7 @@ def create_all_prices_dataframe(data_with_live_prices, label, target_length=720)
 
 def getData(config):
     """
-    The function to grab the data. To avoid API limits, using yfinance. This data is for personal use only. 
+    The function to grab the data. To avoid API limits we are using yfinance. This data is for personal use only. 
     """
     crypto_list = currencystringtolist(config["ticker"]["symbol"])
     logging.info("Getting Data")
@@ -793,12 +794,11 @@ def updateDisplay(image, config, allprices, volumes):
         whichcoin = crypto_list[index]
         logging.info(whichcoin)
         if config["display"]["inverted"] == True:
-            currencythumbnail = "currency/" + whichcoin + "INV.png"
+            currencythumbnail = "data/symbol_images/" + whichcoin + "INV.png"
         else:
-            currencythumbnail = "currency/" + whichcoin + ".png"
-        tokenfilename = os.path.join(picdir, currencythumbnail)
+            currencythumbnail = "data/symbol_images/" + whichcoin + ".png"
+        tokenfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),currencythumbnail)
         sparkpng = Image.open(os.path.join(picdir, key + "spark.png"))
-        #   Check for token image, if there isn't one, get on off coingecko, resize it and pop it on a white background
         if os.path.isfile(tokenfilename):
             logging.info("Getting token Image from Image directory")
             tokenimage = Image.open(tokenfilename)
@@ -1194,68 +1194,28 @@ def display_startup(display):
     img = img.rotate(180, expand=True)
     display.frame_buf.paste(img, paste_coords)
     display.draw_full(constants.DisplayModes.GC16)
+    time.sleep(5)
 
 
-def main():
-    img = Image.new("RGB", (1448, 1072), color=(255, 255, 255))  # initialise image
-    #   If we log to a file, we will need to set up log rotation, so for now it goes to /var/log/syslog
-    logging.basicConfig(level=logging.INFO)
-    args = parse_args()
-    #   Get the configuration from config.yaml
+def getconfig(configfile):
+    my_list=[]
+    weights=[]
     with open(configfile) as f:
         config = yaml.safe_load(f)
-    logging.info("Read Config File")
+    logging.info("Reading Config File")
     logging.info(config)
-    if not args.virtual:
-        from IT8951.display import AutoEPDDisplay
-
-        logging.info("Initializing EPD...")
-
-        # here, spi_hz controls the rate of data transfer to the device, so a higher
-        # value means faster display refreshes. the documentation for the IT8951 device
-        # says the max is 24 MHz (24000000), but my device seems to still work as high as
-        # 80 MHz (80000000)
-        display = AutoEPDDisplay(
-            vcom=config["display"]["vcom"], rotate=args.rotate, spi_hz=24000000
-        )
-
-        # logging.info('VCOM set to', str(display.epd.get_vcom()))
-    
- 
-    else:
-        from IT8951.display import VirtualEPDDisplay
-
-        display = VirtualEPDDisplay(dims=(1448, 1072), rotate=args.rotate)
-
-    if not args.error:
-        pass
-    else:
-        img = beanaproblem(
-            display, "This is testing formatting on the page triggered by exceptions."
-        )
-        display_image_8bpp(display, img, config)
-        exit(0)
-    display_gradient(display)
-    # Initialize the arrays for modes and weights
-    my_list = []
-    weights = []
-
     # Extract modes and weights
     for item in config['function']:
         my_list.append(item['mode'])
         weights.append(int(item['weight']))
-
     #   Turn the strings for fiat currency and crypto currency into something we can work with
-
     if 'ticker' in config:
         curr_string = config["ticker"]["symbol"]
         curr_list = curr_string.split(",")
         curr_list = [x.strip(" ") for x in curr_list]
-
         fiat_string = config["ticker"]["fiatcurrency"]
         fiat_list = fiat_string.split(",")
         fiat_list = [x.strip(" ") for x in fiat_list]
-
         if len(fiat_list) != len(curr_list):
             logging.info(
                 " Symbol and fiatcurrency lists differ in length. Using first fiat entry only"
@@ -1273,10 +1233,72 @@ def main():
         updatefrequency = 60.0
     else:
         updatefrequency = float(config["display"]["updatefrequency"])
+    return fiat_list, curr_list, updatefrequency, my_list, weights, config 
+
+
+def wait_for_change(file_path: str, timeout: int):
+    #   Pauses execution for `timeout` seconds unless `file_path` is modified
+    last_mod_time = os.path.getmtime(file_path)
+
+    start_time = time.time()
+                    
+    while time.time() - start_time < timeout:
+        current_mod_time = os.path.getmtime(file_path)
+        if current_mod_time != last_mod_time:
+            print("File changed! Exiting early.")
+            return
+                                                                            
+        time.sleep(0.5)  # Check every 0.5 seconds
+                                                                                
+    print("Wait time elapsed without file change.")
+
+
+def main():
+    
+#   Get the configuration from config.yaml
+    fiat_list, curr_list, updatefrequency, my_list, weights, config = getconfig(configfile)
+    
+    img = Image.new("RGB", (1448, 1072), color=(255, 255, 255))  # initialise image
+    #   If we log to a file, we will need to set up log rotation, so for now it goes to /var/log/syslog
+    args = parse_args()
+    
+    if not args.virtual:
+        from IT8951.display import AutoEPDDisplay
+
+        logging.info("Initializing EPD...")
+
+        # here, spi_hz controls the rate of data transfer to the device, so a higher
+        # value means faster display refreshes. the documentation for the IT8951 device
+        # says the max is 24 MHz (24000000), but my device seems to still work as high as
+        # 80 MHz (80000000)
+        display = AutoEPDDisplay(
+            vcom=config["display"]["vcom"], rotate=args.rotate, spi_hz=24000000
+        )
+
+        # logging.info('VCOM set to', str(display.epd.get_vcom()))
+    
+    else:
+        from IT8951.display import VirtualEPDDisplay
+
+        display = VirtualEPDDisplay(dims=(1448, 1072), rotate=args.rotate)
+
+    if not args.error:
+        pass
+    else:
+        img = beanaproblem(
+            display, "This is testing formatting on the page triggered by exceptions."
+        )
+        display_image_8bpp(display, img, config)
+        exit(0)
+    display_gradient(display)
+    
+    
     while internet() == False:
         logging.info("Waiting for Internet")
         time.sleep(1)
     lastrefresh = time.time()
+    
+    
     # Set up the button
     button = gpiozero.Button(17)
     button.when_pressed = lambda: togglebutton(
@@ -1337,9 +1359,11 @@ def main():
                     diff = lastrefresh - starttime
                     # Sleep for update frequency, minus processing time
                     sleepfor = max(1, updatefrequency - int(diff))
-                    time.sleep(sleepfor)
+                    wait_for_change(configfile,sleepfor)
                 else:
                     time.sleep(5)
+            fiat_list, curr_list, updatefrequency, my_list, weights, config = getconfig(configfile)
+         
     except Exception as e:
         logging.error(e)
         img = beanaproblem(img, str(e) + " Line: " + str(e.__traceback__.tb_lineno))
