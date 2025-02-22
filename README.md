@@ -6,7 +6,7 @@
 
 Big Audrey pulls the stuff that you've told it you're intersted in from the internet, then displays it in pleasingly crispy fonts on a 6 inch HD epaper screen. The script currently can provide one, or any combination from a number different display functions at an interval you choose:
 
-- Cryptocurrency Dashboard
+- Cryptocurrency/ Stocks Dashboard
 - Quote (from Reddit [r/quotes](https://reddit.com/r/quotes))
 - Word of the day (from [wordsmith.org](https://wordsmith.org))
 - Headline (From an RSS feed) (With QR code link to the article)
@@ -15,9 +15,9 @@ Big Audrey pulls the stuff that you've told it you're intersted in from the inte
 
 ## Functions
 
-### Cryptocurrency Dashboard
+### Finance Dashboard
 
-Uses code based on the code we made at [btcticker](http://github.com/llvllch/btcticker). The extra screen size means that two three or four coins can fit on the screen at once. If you've listed more coins than that, it will carousel to show all the coins listed. There is also a maximal mode that will show one coin and an item from and RSS news feed, and a QR code link to that article.
+Two three or four coins/symbols can fit on the screen at once. If you've listed more coins than that, it will carousel to show all the coins/ symbols listed.
 
 ### Quotes
 
