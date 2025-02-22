@@ -638,14 +638,6 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
 
     return data_with_live_prices
 
-# Example usage
-symbols = ["AAPL", "GOOGL", "MSFT"]
-result = get_historical_and_live_data(symbols, interval='1h', period='1mo')
-
-# Print last few rows of AAPL data (including the live price)
-print(result["AAPL"].tail())
-
-
 
 def create_all_prices_dataframe(data_with_live_prices, label, target_length=720):
     """
