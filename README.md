@@ -10,7 +10,7 @@ Big Audrey pulls the stuff that you've told it you're intersted in from the inte
 - Cryptocurrency/ Stocks Dashboard
 - Quote (from Reddit [r/quotes](https://reddit.com/r/quotes))
 - Word of the day (from [wordsmith.org](https://wordsmith.org))
-- Headline (From an RSS feed) (With QR code link to the article)
+- Headline (From any RSS feed) (With QR code link to the article)
 - Cartoon (From The New Yorker)
 - Quote (from [Stoic Quotes](https://stoic-quotes.com))
 
