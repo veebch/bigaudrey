@@ -26,9 +26,7 @@ This is a script that parses content from [r/quotes](https://reddit.com/r/quotes
 
 The reason for using r/quotes rather than a curated database, is that the karma score on reddit is a really good way to ensure quotes that are interesting and topical. 
 
-The quality of the results depends on the adherence to convention in posts to [r/quotes](https://reddit.com/r/quotes) and the quality of the regex in the script. Currently the script is rarely producing garbled quotes, so it's ready for sharing. 
-
-As well as producing quotes, the script occasionally places other content on the epaper - to keep things interesting.
+The quality of the results depends on the adherence to convention in posts to [r/quotes](https://reddit.com/r/quotes) and the quality of the regex in the script. Currently the script is rarely producing garbled quotes.  
 
 ### Word of the day
 
