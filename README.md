@@ -47,12 +47,6 @@ A cartoon from The New Yorker RSS feed.
 
 A quote from stoic-quotes.com.
 
-# Prerequisites
-
-- A working Pi with waveshare 6inch HD ePaper attached
-- The code to drive the display: [IT8951](https://github.com/GregDMeyer/IT8951) installed
-
-    
 # Configuration
 
 Edit the file config.yaml. Entries are commented to indicate their function. There are boolean values for activation of modes, as well as a function section that lists the functions that are sampled from on each refresh iteration. There is also a weighting of those samples. 
@@ -63,46 +57,6 @@ function:
   weight: 1, 10, 1, 1, 1, 0, 1       
 ```
 Means that on each iteration there is a 1:10:1:1:1:1 weighting that the code will choose the functions crypto, redditquotes, wordaday, newyorkercartoon, guardianheadlines and stoic respectively.
-
-# Add Autostart
-
-
-```
-cat <<EOF | sudo tee /etc/systemd/system/btcticker.service
-[Unit]
-Description=btcticker
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/python3 -u /home/pi/stonks/cryptotick.py
-WorkingDirectory=/home/pi/stonks/
-StandardOutput=inherit
-StandardError=inherit
-Restart=always
-User=pi
-
-[Install]
-WantedBy=multi-user.target
-EOF
-```
-Now, simply enable the service you just made and reboot
-```  
-sudo systemctl enable btcticker.service
-sudo systemctl start btcticker.service
-
-sudo reboot
-```
-
-# Video
-
-A demo of some of the features:
-
-[![video](https://img.youtube.com/vi/Xv8eyp-LJJk/0.jpg)](https://www.youtube.com/watch?v=Xv8eyp-LJJk)
-
-# Hardware
-
-- The code runs on a Rasperry Pi connected to a 6 inch HD waveshare epaper display
-- The custom metal frame was made for the project - we've got some assembled units for sale at [veeb.ch](https://www.veeb.ch/store/p/tickerxl)
 
 # Contributing
 
