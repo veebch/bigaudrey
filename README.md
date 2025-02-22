@@ -53,11 +53,23 @@ A quote from stoic-quotes.com.
 Edit the file config.yaml. Entries are commented to indicate their function. There are boolean values for activation of modes, as well as a function section that lists the functions that are sampled from on each refresh iteration. There is also a weighting of those samples. 
 
 ```
-function:                           
-  mode: crypto,redditquotes, wordaday, newyorkercartoon, guardianheadlines, textfilequotes, stoic
-  weight: 1, 10, 1, 1, 1, 0, 1       
+function: # Functions that Audrey has, along with a weighting for each
+  - mode: ticker
+    weight: 1 
+  - mode: redditquotes
+    weight: 10
+  - mode: wordaday
+    weight: 1
+  - mode: newyorkercartoon
+    weight: 1
+  - mode: headlines
+    weight: 1    
+  - mode: textfilequotes
+    weight: 1
+  - mode: stoic
+    weight: 1     
 ```
-Means that on each iteration there is a 1:10:1:1:1:1 weighting that the code will choose the functions crypto, redditquotes, wordaday, newyorkercartoon, guardianheadlines and stoic respectively.
+Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code will choose the functions ticker, redditquotes, wordaday, newyorkercartoon, headlines textfilequotes and stoic respectively.
 
 # Contributing
 
