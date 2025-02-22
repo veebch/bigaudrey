@@ -631,8 +631,9 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
 
                     # Append live data to the historical DataFrame
                     data = pd.concat([data, live_data])
-
+            
                 data_with_live_prices[symbol] = data
+                print(data_with_live_prices[symbol][-1])
             else:
                 print(f"No data returned for {symbol}. Check the symbol or date range.")
                 data_with_live_prices[symbol] = pd.DataFrame()
