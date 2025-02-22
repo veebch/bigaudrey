@@ -52,31 +52,6 @@ A quote from stoic-quotes.com.
 - A working Pi with waveshare 6inch HD ePaper attached
 - The code to drive the display: [IT8951](https://github.com/GregDMeyer/IT8951) installed
 
-# Installation
-
-Get your RaspiOS up-to-date using
-    
-    sudo apt-get update
-    sudo apt-get upgrade
-
-then, enable the SPI interface and clone this repository using
-
-    cd ~
-    sudo raspi-config nonint do_spi 0
-    git clone https://github.com/veebch/stonks
-    sudo reboot
-   
-This will reboot the pi. Reconnect to the pi and install the modules needed to run this code, using pip and apt-get:
-
-    python3 -m pip install --upgrade pip  
-    python3 -m pip install -r requirements.txt
-    sudo apt-get install libatlas-base-dev python3-matplotlib python3-numpy
-
-Make a copy of the example config file and run the code using:
-    
-    cd ~/stonks
-    cp config_example.yaml config.yaml
-    python3 cryptotick.py
     
 # Configuration
 
