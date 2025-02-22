@@ -586,7 +586,7 @@ def beanaproblem(image, message):
 def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
     """
     Fetch historical data for a list of symbols with the given interval and period,
-    and append the latest live price.
+    and append the latest live price with timezone consistency.
 
     Args:
         symbols (list): List of stock symbols to fetch data for.
@@ -605,15 +605,21 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             data = ticker.history(period=period, interval=interval)
 
             if not data.empty:
-                # Try getting live price from fast_info, fallback to info if None
+                # Ensure the live price retrieval is robust
                 live_price = ticker.fast_info.get('last_price')
 
                 if live_price is None:  # Fallback method
-                    live_price = ticker.info.get('previousClose')  # Last known close price
+                    live_price = ticker.info.get('previousClose')
 
                 print(f"Live price for {symbol}: {live_price}")  # Debugging trace
 
                 if live_price is not None:
+                    # Get the timezone from historical data
+                    tz = data.index.tz
+
+                    # Create a timezone-aware timestamp
+                    live_timestamp = pd.Timestamp.now(tz=tz)
+
                     # Create a DataFrame for the live price
                     live_data = pd.DataFrame({
                         'Open': [None],  
@@ -621,7 +627,7 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
                         'Low': [None],   
                         'Close': [live_price],  
                         'Volume': [None]  
-                    }, index=[pd.Timestamp.now()])  
+                    }, index=[live_timestamp])  
 
                     # Append live data to the historical DataFrame
                     data = pd.concat([data, live_data])
@@ -635,7 +641,7 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
             data_with_live_prices[symbol] = pd.DataFrame()
 
     return data_with_live_prices
-
+  
 
 def create_all_prices_dataframe(data_with_live_prices, label, target_length=720):
     """
