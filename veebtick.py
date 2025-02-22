@@ -585,7 +585,8 @@ def beanaproblem(image, message):
 
 def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
     """
-    Fetch historical data for a list of symbols with the given interval and period.
+    Fetch historical data for a list of symbols with the given interval and period,
+    and append the latest live price.
 
     Args:
         symbols (list): List of stock symbols to fetch data for.
@@ -593,17 +594,33 @@ def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
         period (str): Data period (e.g., '5d', '7d', '1mo').
 
     Returns:
-        dict: A dictionary where keys are symbols and values are the historical DataFrame.
+        dict: A dictionary where keys are symbols and values are DataFrames with historical + live prices.
     """
     data_with_live_prices = {}
 
     for symbol in symbols:
         try:
-            # Use yf.Ticker.history for high-frequency intervals
+            # Get historical data
             ticker = yf.Ticker(symbol)
             data = ticker.history(period=period, interval=interval)
 
             if not data.empty:
+                # Get the latest live price
+                live_price = ticker.fast_info.get('last_price', None)
+
+                if live_price is not None:
+                    # Create a DataFrame for the live price
+                    live_data = pd.DataFrame({
+                        'Open': [None],  # No open price for live
+                        'High': [None],  # No high price for live
+                        'Low': [None],   # No low price for live
+                        'Close': [live_price],  # Current live price
+                        'Volume': [None]  # No live volume data
+                    }, index=[pd.Timestamp.now()])  # Timestamp for the live price
+
+                    # Append live data to the historical DataFrame
+                    data = pd.concat([data, live_data])
+
                 data_with_live_prices[symbol] = data
             else:
                 print(f"No data returned for {symbol}. Check the symbol or date range.")
