@@ -7,7 +7,7 @@
 
 Big Audrey pulls the stuff that you've told it you're intersted in from the internet, then displays it in pleasingly crispy fonts on a 6 inch HD epaper screen. The script currently can provide one, or any combination from a number different display functions at an interval you choose:
 
-- Cryptocurrency/ Stocks Dashboard[yfinance](https://github.com/ranaroussi/yfinance)
+- Cryptocurrency/ Stocks Dashboard (using [yfinance](https://github.com/ranaroussi/yfinance))
 - Quote (from Reddit [r/quotes](https://reddit.com/r/quotes))
 - Word of the day (from [wordsmith.org](https://wordsmith.org))
 - Headline (From any RSS feed) (With QR code link to the article)
