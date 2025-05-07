@@ -102,6 +102,36 @@ Copy the example config file:
 Now you should be able to run the code using 
 
 ``` python3 veebtick.py ```
+ 
+## Setting to run automatically
+
+To use systemd, 
+```sudo nano /etc/systemd/system/veebtick.service```
+
+and enter
+```
+[Unit]
+Description=Veebtick Python Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bigaudrey
+ExecStart=/home/pi/audrey/bin/python /home/pi/bigaudrey/veebtick.py
+Restart=on-failure
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+```
+Enable the service and start it with:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable veebtick.service
+sudo systemctl start veebtick.service
+```
 # Contributing
 
 To contribute, please fork the repository and use a feature branch. Pull requests are welcome.
