@@ -44,30 +44,6 @@ A cartoon from The New Yorker RSS feed.
 
 A quote from stoic-quotes.com.
 
-# Configuration
-
-Once an internet connection is established. Big Audrey is on your LAN. To edit the config file you can either ssh (path: bigaudrey/data) in or point a webrowser at `bigaudrey.local:8080` to edit the config file.
-
-Edit the file config.yaml. Entries are commented to indicate their function. There are boolean values for activation of modes, as well as a function section that lists the functions that are sampled from on each refresh iteration. There is also a weighting of those samples. 
-
-```
-function: # Functions that Audrey has, along with a weighting for each
-  - mode: ticker
-    weight: 1 
-  - mode: redditquotes
-    weight: 10
-  - mode: wordaday
-    weight: 1
-  - mode: newyorkercartoon
-    weight: 1
-  - mode: headlines
-    weight: 1    
-  - mode: textfilequotes
-    weight: 1
-  - mode: stoic
-    weight: 1     
-```
-Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code will choose the functions ticker, redditquotes, wordaday, newyorkercartoon, headlines textfilequotes and stoic respectively.
 # Installation
 
 The first thing that needs to be set up is a venv so that we can install the dependencies.
@@ -102,8 +78,34 @@ Copy the example config file:
 Now you should be able to run the code using 
 
 ``` python3 veebtick.py ```
+# Configuration
 
-All configuration is performed by editing `data/config.yaml`. If you want to easily edit it from your phone etc, then install
+To edit the config file you can either ssh (path: bigaudrey/data).
+
+Edit the file config.yaml. Entries are commented to indicate their function. There are boolean values for activation of modes, as well as a function section that lists the functions that are sampled from on each refresh iteration. There is also a weighting of those samples. 
+
+```
+function: # Functions that Audrey has, along with a weighting for each
+  - mode: ticker
+    weight: 1 
+  - mode: redditquotes
+    weight: 10
+  - mode: wordaday
+    weight: 1
+  - mode: newyorkercartoon
+    weight: 1
+  - mode: headlines
+    weight: 1    
+  - mode: textfilequotes
+    weight: 1
+  - mode: stoic
+    weight: 1     
+```
+Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code will choose the functions ticker, redditquotes, wordaday, newyorkercartoon, headlines textfilequotes and stoic respectively.
+
+### Optional
+
+If you want to easily edit it from your phone etc, then install
 the excellent [filebrowser](https://github.com/filebrowser/filebrowser)
 
 ## Automatic Startup 
