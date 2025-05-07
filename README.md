@@ -70,6 +70,8 @@ function: # Functions that Audrey has, along with a weighting for each
 Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code will choose the functions ticker, redditquotes, wordaday, newyorkercartoon, headlines textfilequotes and stoic respectively.
 # Installation
 
+The first thing that needs to be set up is a venv so that we can install the dependencies.
+
 Using the Raspberry Pi imager, copy the latest image to your SD card, add your wifi details and add a user 'pi'. set the hostname to bigaudrey.local.
 
 Now ssh in, and add a venv using the command:
@@ -80,7 +82,26 @@ then start the virtual environment using
 
 ``` source audrey/bin/activate ``` 
 
+Install IT8951 ( make sure you use `pip install ./[rpi]`)
 
+clone this repository and cd into the directory with 
+
+```
+git clone https://github.com/veebch/bigaudrey.git
+cd bigaudrey
+```
+
+Install the requirements with 
+
+``` python3 -m pip install -r requirements.txt ```
+
+Copy the example config file:
+
+``` cp config_example.yaml data/config.yaml```
+
+Now you should be able to run the code using 
+
+``` python3 veebtick.py ```
 # Contributing
 
 To contribute, please fork the repository and use a feature branch. Pull requests are welcome.
