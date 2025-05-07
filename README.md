@@ -102,9 +102,11 @@ Copy the example config file:
 Now you should be able to run the code using 
 
 ``` python3 veebtick.py ```
- 
-## Setting to run automatically
 
+All configuration is performed by editing `data/config.yaml`. If you want to easily edit it from your phone etc, then install
+the excellent [filebrowser](https://github.com/filebrowser/filebrowser)
+
+## Automatic Startup 
 To use systemd, 
 ```sudo nano /etc/systemd/system/veebtick.service```
 
