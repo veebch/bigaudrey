@@ -68,6 +68,18 @@ function: # Functions that Audrey has, along with a weighting for each
     weight: 1     
 ```
 Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code will choose the functions ticker, redditquotes, wordaday, newyorkercartoon, headlines textfilequotes and stoic respectively.
+# Installation
+
+Using the Raspberry Pi imager, copy the latest image to your SD card, add your wifi details and add a user 'pi'. set the hostname to bigaudrey.local.
+
+Now ssh in, and add a venv using the command:
+
+``` python3 -m venv audrey ```
+
+then start the virtual environment using 
+
+``` source audrey/bin/activate ``` 
+
 
 # Contributing
 
