@@ -46,7 +46,9 @@ A quote from stoic-quotes.com.
 
 # Installation
 
-This is how to build the image from scratch. It means you'll be using the most up-to-date version of the various libraries. The first thing that needs to be set up is a venv so that we can install the dependencies.
+This is how to build the code from scratch. It means you'll be using the most up-to-date version of the various libraries.
+
+The first thing that needs to be set up is a venv so that we can install the dependencies.
 
 Using the Raspberry Pi imager, copy the latest image to your SD card, add your wifi details and add a user 'pi'. set the hostname to bigaudrey.local.
 
