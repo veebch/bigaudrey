@@ -97,7 +97,7 @@ Run [FileBrowser](https://github.com/filebrowser/filebrowser) for easy editing:
 ```bash
 filebrowser -r /home/pi/bigaudrey/data -p 8080 -a 0.0.0.0
 ```  
-Access via `http://bigaudrey.local:8080` on any LAN device.  
+Access via `http://bigaudrey.local:8080` on any device on the same network as Audrey.  
 
 ## Auto-Start (Systemd)  
 1. Create a service file:  
