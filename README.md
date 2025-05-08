@@ -111,7 +111,7 @@ If you want to easily edit the config file from your phone etc, then install
 the excellent [filebrowser](https://github.com/filebrowser/filebrowser)
 and point it at the config directory with
 `filebrowser -r /home/pi/bigaudrey/data -p 8080 -a 0.0.0.0`. 
-You can now access it by pointing any device on the same LAN with a web-browser at `http://<HOSTNAME>.local:8080`
+You can now access it by pointing any device on the same LAN with a web-browser at `http://bigaudrey.local:8080`
 
 ## Automatic Startup 
 To use systemd, 
