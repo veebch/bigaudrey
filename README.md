@@ -107,8 +107,11 @@ Means that on each iteration there is a 1:10:1:1:1:1:1 weighting that the code w
 
 ### Optional
 
-If you want to easily edit it from your phone etc, then install
+If you want to easily edit the from your phone etc, then install
 the excellent [filebrowser](https://github.com/filebrowser/filebrowser)
+and point it at the config directory with
+`filebrowser -r /home/pi/bigaudrey/data -p 8080 -a 0.0.0.0`. 
+You can now access it by pointing any device on the same LAN with a web-browser at `http://<HOSTNAME>.local:8080`
 
 ## Automatic Startup 
 To use systemd, 
