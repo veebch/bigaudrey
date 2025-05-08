@@ -16,7 +16,7 @@ Big Audrey fetches content tailored to your interests from the internet and disp
 ## Features  
 
 ### 📊 Finance Dashboard  
-Displays 2-4 cryptocurrencies/stocks per screen. If more are configured, it cycles through them in a carousel.  
+Displays 2-4 cryptocurrencies/stocks per screen. If more are than that number are configured, then the screen cycles through them in a carousel.  
 
 ### 💬 Quotes  
 Parses and formats quotes from [r/quotes](https://reddit.com/r/quotes), leveraging Reddit's karma system to surface high-quality, relevant content.  
