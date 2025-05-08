@@ -1,6 +1,5 @@
 feedparser==6.0.11
 gpiozero==2.0.1
-it8951==1.0.0
 matplotlib==3.10.1
 numpy==2.2.5
 pandas==2.2.3
