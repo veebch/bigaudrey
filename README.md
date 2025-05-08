@@ -51,10 +51,11 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
    source audrey/bin/activate
    ```  
 
-2. **Clone this repository**:  
+2. **Clone this repository and turn on SPI**:  
    ```bash
    git clone https://github.com/veebch/bigaudrey.git
    cd bigaudrey
+   sudo raspi-config nonint do_spi 0
    ```  
 
 3. **Install dependencies**:
