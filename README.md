@@ -56,20 +56,20 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
    cd bigaudrey
    ```  
 
-3. **Install dependencies**:  
+3. **Install dependencies**:
+   install [IT8951](https://github.com/GregDMeyer/IT8951) driver for e-paper
    ```bash
-   pip install ./IT8951[rpi]  # Install IT8951 driver for e-paper
    pip install -r requirements.txt
    ```  
 
-4. **Configure**:  
+5. **Configure**:  
    Copy the example config and edit as needed:  
    ```bash
    cp config_example.yaml data/config.yaml
    nano data/config.yaml  # Edit preferences
    ```  
 
-5. **Run**:  
+6. **Run**:  
    ```bash
    python3 veebtick.py
    ```  
