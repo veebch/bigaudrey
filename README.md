@@ -40,9 +40,9 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
 
 ### Prerequisites  
 - Raspberry Pi (set up via [Raspberry Pi Imager](https://www.raspberrypi.com/software/))
+   - Hostname: `bigaudrey`  
+   - User: `pi`
 - HD Epaper Screen ([Waveshare Screen](https://www.waveshare.com/product/6inch-hd-e-paper-hat.htm))
-- Hostname: `bigaudrey`  
-- User: `pi`  
 
 ### Setup  
 1. **SSH into the Pi** and create a virtual environment:  
