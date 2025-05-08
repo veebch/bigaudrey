@@ -50,7 +50,7 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
    source audrey/bin/activate
    ```  
 
-2. **Clone the repository**:  
+2. **Clone this repository**:  
    ```bash
    git clone https://github.com/veebch/bigaudrey.git
    cd bigaudrey
