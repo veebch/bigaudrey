@@ -39,7 +39,8 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
 ## Installation  
 
 ### Prerequisites  
-- Raspberry Pi (set up via [Raspberry Pi Imager](https://www.raspberrypi.com/software/))  
+- Raspberry Pi (set up via [Raspberry Pi Imager](https://www.raspberrypi.com/software/))
+- HD Epaper Screen ([Waveshare Screen](https://www.waveshare.com/product/6inch-hd-e-paper-hat.htm))
 - Hostname: `bigaudrey`  
 - User: `pi`  
 
