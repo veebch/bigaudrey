@@ -57,6 +57,7 @@ Daily wisdom from [Stoic-Quotes.com](https://stoic-quotes.com).
    ```  
 
 3. **Install dependencies**:
+   
    install [IT8951](https://github.com/GregDMeyer/IT8951) driver for e-paper
    ```bash
    pip install -r requirements.txt
