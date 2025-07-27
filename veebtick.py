@@ -408,19 +408,34 @@ def redditquotes(img, config):
         time.sleep(10)
     return img, success
 
+import feedparser
+import requests
+from PIL import Image
+from bs4 import BeautifulSoup
+import logging
+import time
 
 def newyorkercartoon(img, config):
     try:
-        logging.info("Get a Cartoon")
-        d = feedparser.parse("https://www.newyorker.com/feed/cartoons/daily-cartoon")
-        caption = d.entries[0].summary
-        imagedeets = d.entries[0].media_thumbnail[0]
-        imframe = Image.open(requests.get(imagedeets["url"], stream=True).raw)
+        logging.info("Get an XKCD cartoon")
+        d = feedparser.parse("https://xkcd.com/rss.xml")
+        description_html = d.entries[0].description
+
+        # Extract image src and alt-text (title) using BeautifulSoup
+        soup = BeautifulSoup(description_html, "html.parser")
+        img_tag = soup.find("img")
+        img_url = img_tag["src"]
+        caption = img_tag["title"]
+
+        # Download and resize image
+        imframe = Image.open(requests.get(img_url, stream=True).raw)
         resize = 1200, 800
         imframe.thumbnail(resize, Image.BICUBIC)
         imwidth, imheight = imframe.size
         xvalue = int(1448 / 2 - imwidth / 2)
         img.paste(imframe, (xvalue, 75))
+
+        # Write caption below
         fontstring = "Forum-Regular"
         y_text = 370
         height = 50
@@ -429,13 +444,18 @@ def newyorkercartoon(img, config):
         img, numline = writewrappedlines(
             img, caption, fontsize, y_text, height, width, fontstring
         )
+
         success = True
+
     except Exception as e:
-        message = "Interlude due to a data pull/print problem (Cartoon)"
+        logging.error(f"Failed to fetch XKCD: {e}")
+        message = "Interlude due to a data pull/print problem (XKCD)"
         img = beanaproblem(img, message)
         success = False
         time.sleep(10)
+
     return img, success
+
 
 
 def headlines(img, config):
