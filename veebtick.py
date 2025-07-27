@@ -53,6 +53,9 @@ import decimal
 import yfinance as yf
 import pandas as pd
 
+from PIL import Image
+from bs4 import BeautifulSoup
+
 dirname = os.path.dirname(__file__)
 configfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data/config.yaml")
 picdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
@@ -408,39 +411,39 @@ def redditquotes(img, config):
         time.sleep(10)
     return img, success
 
-import feedparser
-import requests
-from PIL import Image
-from bs4 import BeautifulSoup
-import logging
-import time
 
 def newyorkercartoon(img, config):
     try:
         logging.info("Get an XKCD cartoon")
+        
+        # Parse XKCD RSS feed
         d = feedparser.parse("https://xkcd.com/rss.xml")
         description_html = d.entries[0].description
 
-        # Extract image src and alt-text (title) using BeautifulSoup
+        # Extract <img src=... title=...> from the description
         soup = BeautifulSoup(description_html, "html.parser")
         img_tag = soup.find("img")
         img_url = img_tag["src"]
         caption = img_tag["title"]
 
-        # Download and resize image
+        # Download image
         imframe = Image.open(requests.get(img_url, stream=True).raw)
-        resize = 1200, 800
+
+        # Resize for 1448x1072 e-paper display
+        resize = (1300, 800)
         imframe.thumbnail(resize, Image.BICUBIC)
         imwidth, imheight = imframe.size
-        xvalue = int(1448 / 2 - imwidth / 2)
-        img.paste(imframe, (xvalue, 75))
+        xvalue = (1448 - imwidth) // 2
+        yvalue = 20  # Top margin
+        img.paste(imframe, (xvalue, yvalue))
 
-        # Write caption below
-        fontstring = "Forum-Regular"
-        y_text = 370
+        # Render caption (XKCD alt-text) below the image
+        fontstring = "Forum-Regular"  # Replace if you use another font
+        fontsize = 36
+        y_text = yvalue + imheight + 30  # Leave some space below image
         height = 50
         width = 50
-        fontsize = 60
+
         img, numline = writewrappedlines(
             img, caption, fontsize, y_text, height, width, fontstring
         )
