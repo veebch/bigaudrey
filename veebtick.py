@@ -416,36 +416,44 @@ def newyorkercartoon(img, config):
     try:
         logging.info("Get an XKCD cartoon")
         
-        # Parse XKCD RSS feed
+        # Parse XKCD feed
         d = feedparser.parse("https://xkcd.com/rss.xml")
-        description_html = d.entries[0].description
-
-        # Extract <img src=... title=...> from the description
-        soup = BeautifulSoup(description_html, "html.parser")
+        soup = BeautifulSoup(d.entries[0].description, "html.parser")
         img_tag = soup.find("img")
+
         img_url = img_tag["src"]
         caption = img_tag["title"]
 
         # Download image
         imframe = Image.open(requests.get(img_url, stream=True).raw)
 
-        # Resize for 1448x1072 e-paper display
-        resize = (1300, 800)
-        imframe.thumbnail(resize, Image.BICUBIC)
+        # Layout constants
+        DISPLAY_WIDTH = 1448
+        DISPLAY_HEIGHT = 1072
+        TOP_MARGIN = 30
+        SIDE_MARGIN = 30
+        BOTTOM_MARGIN = 30
+        CAPTION_HEIGHT = 200  # Reserve space for alt-text
+        MAX_IMG_HEIGHT = DISPLAY_HEIGHT - CAPTION_HEIGHT - TOP_MARGIN - BOTTOM_MARGIN
+        MAX_IMG_WIDTH = DISPLAY_WIDTH - 2 * SIDE_MARGIN
+
+        # Resize to fit within max area
+        imframe.thumbnail((MAX_IMG_WIDTH, MAX_IMG_HEIGHT), Image.BICUBIC)
         imwidth, imheight = imframe.size
-        xvalue = (1448 - imwidth) // 2
-        yvalue = 20  # Top margin
-        img.paste(imframe, (xvalue, yvalue))
+        xpos = (DISPLAY_WIDTH - imwidth) // 2
+        ypos = TOP_MARGIN
+        img.paste(imframe, (xpos, ypos))
 
-        # Render caption (XKCD alt-text) below the image
-        fontstring = "Forum-Regular"  # Replace if you use another font
-        fontsize = 36
-        y_text = yvalue + imheight + 30  # Leave some space below image
-        height = 50
-        width = 50
+        # Caption rendering
+        fontsize = 42
+        fontstring = "Forum-Regular"  # Swap with a known-good e-paper font if needed
+        caption_y = ypos + imheight + 30  # spacing below image
+        text_x = SIDE_MARGIN
+        text_y = caption_y
+        line_height = 50
 
-        img, numline = writewrappedlines(
-            img, caption, fontsize, y_text, height, width, fontstring
+        img, _ = writewrappedlines(
+            img, caption, fontsize, text_y, line_height, text_x, fontstring
         )
 
         success = True
