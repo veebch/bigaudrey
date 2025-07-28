@@ -462,7 +462,7 @@ def newyorkercartoon(img=None, config=None):
             img = img.convert('RGB')
         
         # Calculate aspect ratio preserving dimensions
-        target_w, target_h = 1300, 900
+        target_w, target_h = 1400, 1072
         original_w, original_h = img.size
         ratio = min(target_w/original_w, target_h/original_h)
         new_w = int(original_w * ratio)
