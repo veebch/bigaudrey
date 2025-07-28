@@ -415,62 +415,79 @@ import feedparser
 import random
 import requests
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 
 def newyorkercartoon(img=None, config=None):
     """
-    Fetches a random cartoon from PoorlyDrawnLines RSS feed and returns it as a 1400x1072 PIL Image.
+    Fetches a random cartoon from PoorlyDrawnLines and returns it as a padded 1400x1072 image
+    maintaining original aspect ratio.
+    
+    Args:
+        img: Ignored (maintained for compatibility)
+        config: Ignored (maintained for compatibility)
     
     Returns:
-        tuple: (PIL.Image, bool) - The cartoon image resized to 1400x1072 and success status
+        tuple: (PIL.Image, bool) - The padded image and success status (always True unless error occurs)
     """
-    # Parse the RSS feed
-    feed_url = "http://feeds.feedburner.com/PoorlyDrawnLines"
-    feed = feedparser.parse(feed_url)
-    
-    if not feed.entries:
-        raise ValueError("No entries found in the RSS feed")
-    
-    # Extract all image URLs from the feed entries
-    image_urls = []
-    for entry in feed.entries:
-        if 'content' in entry:
-            for content in entry.content:
-                if content.type == 'text/html':
-                    # Find the start of the image URL
-                    start = content.value.find('src="https://poorlydrawnlines.com/wp-content/uploads/')
-                    if start != -1:
-                        start += len('src="')
-                        end = content.value.find('"', start)
-                        img_url = content.value[start:end]
-                        image_urls.append(img_url)
-    
-    if not image_urls:
-        raise ValueError("No images found in the RSS feed entries")
-    
-    # Select a random image URL
-    random_image_url = random.choice(image_urls)
-    
-    # Download the image
     try:
-        response = requests.get(random_image_url, timeout=10)
+        # Parse the RSS feed
+        feed = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
+        
+        if not feed.entries:
+            raise ValueError("No comics found in the RSS feed")
+
+        # Extract all image URLs from content
+        image_urls = []
+        for entry in feed.entries:
+            if hasattr(entry, 'content'):
+                for content in entry.content:
+                    html = content.value
+                    src_pos = html.find('src="https://poorlydrawnlines.com/wp-content/uploads/')
+                    if src_pos > -1:
+                        src_start = src_pos + 5
+                        src_end = html.find('"', src_start)
+                        image_urls.append(html[src_start:src_end])
+
+        if not image_urls:
+            raise ValueError("No image URLs found in feed content")
+
+        # Fetch random image
+        image_url = random.choice(image_urls)
+        response = requests.get(image_url, timeout=10)
         response.raise_for_status()
-        
-        # Open the image with PIL
+
+        # Process image
         img = Image.open(BytesIO(response.content))
-        
-        # Convert to RGB if necessary (for JPEG compatibility)
-        if img.mode in ('RGBA', 'P'):
+        if img.mode != 'RGB':
             img = img.convert('RGB')
         
-        # Resize to 1400x1072
-        img = img.resize((1400, 1072), Image.LANCZOS)
+        # Calculate aspect ratio preserving dimensions
+        target_w, target_h = 1400, 1072
+        original_w, original_h = img.size
+        ratio = min(target_w/original_w, target_h/original_h)
+        new_w = int(original_w * ratio)
+        new_h = int(original_h * ratio)
         
-        return img, True
+        # Resize maintaining aspect ratio
+        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         
-    except Exception as e:
-        raise ValueError(f"Failed to process image from {random_image_url}: {str(e)}")
+        # Create new image with white background
+        padded_img = Image.new('RGB', (target_w, target_h), (255, 255, 255))
+        x_offset = (target_w - new_w) // 2
+        y_offset = (target_h - new_h) // 2
+        padded_img.paste(img, (x_offset, y_offset))
+        
+        return padded_img, True
 
+    except Exception as e:
+        print(f"Error fetching cartoon: {str(e)}")
+        return None, False
+
+# Example usage:
+# cartoon, success = poorly_drawn_lines_cartoon()
+# if success:
+#     cartoon.show()
+#     cartoon.save("cartoon.jpg", quality=95)
 
 def headlines(img, config):
     try:
