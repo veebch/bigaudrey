@@ -462,7 +462,7 @@ def newyorkercartoon():
     # Resize to 1400x1072
     img = img.resize((1400, 1072), Image.LANCZOS)
     
-    return img, 
+    return img, True
 
 # Example usage:
 # cartoon = get_random_poorly_drawn_lines_cartoon()
