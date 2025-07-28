@@ -411,71 +411,68 @@ def redditquotes(img, config):
         time.sleep(10)
     return img, success
 
-
-from PIL import Image
+import logging
+import random
+import time
+import feedparser
+import html
+import requests
+from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
-
 
 def newyorkercartoon(img, config):
     try:
-      d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
-      entries = list(d.entries)
-      random.shuffle(entries)
-  
-      img_url = None
-      for entry in entries:
-          desc = entry.get("description", "")
-          unescaped = html.unescape(desc)
-          soup = BeautifulSoup(unescaped, "html.parser")
-          img_tag = soup.find("img")
-          if img_tag and img_tag.get("src", "").startswith("http"):
-              img_url = img_tag["src"]
-              break
+        d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
+        entries = list(d.entries)
+        random.shuffle(entries)
 
-      if not img_url:
-          raise ValueError("No valid image found in feed entries")
-  
-      # Download and convert
-      imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
-      imframe = autocrop(imframe)
-      imframe = imframe.quantize(colors=16, method=Image.FASTOCTREE).convert("L")
-      imframe.thumbnail((1448, 1072), Image.BICUBIC)
+        img_url = None
+        for entry in entries:
+            desc = entry.get("description", "")
+            unescaped = html.unescape(desc)
+            soup = BeautifulSoup(unescaped, "html.parser")
+            img_tag = soup.find("img")
+            if img_tag and img_tag.get("src", "").startswith("http"):
+                img_url = img_tag["src"]
+                break
 
-      # Center
-      imwidth, imheight = imframe.size
-      xvalue = (1448 - imwidth) // 2
-      yvalue = (1072 - imheight) // 2
-      img.paste(imframe, (xvalue, yvalue))
+        if not img_url:
+            raise ValueError("No valid image found in feed entries")
 
-      # Attribution
-      draw = ImageDraw.Draw(img)
-      attribution = "© Reza Farazmand"
-      fontsize = 24
-      try:
-          font = ImageFont.truetype("DejaVuSansMono.ttf", fontsize)
-      except IOError:
-          font = ImageFont.load_default()
-      textwidth, textheight = draw.textsize(attribution, font=font)
+        # Download and convert
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
+        imframe = autocrop(imframe)
+        imframe = imframe.quantize(colors=16, method=Image.FASTOCTREE).convert("L")
+        imframe.thumbnail((1448, 1072), Image.BICUBIC)
+
+        # Center
+        imwidth, imheight = imframe.size
+        xvalue = (1448 - imwidth) // 2
+        yvalue = (1072 - imheight) // 2
+        img.paste(imframe, (xvalue, yvalue))
+
+        # Attribution
+        draw = ImageDraw.Draw(img)
+        attribution = "© Reza Farazmand"
+        fontsize = 24
+        try:
+            font = ImageFont.truetype("DejaVuSansMono.ttf", fontsize)
+        except IOError:
+            font = ImageFont.load_default()
+
+        textwidth, textheight = draw.textsize(attribution, font=font)
         draw.text((1448 - textwidth - 20, 1072 - textheight - 10), attribution, fill=0, font=font)
-  
+
         success = True
-  
-      except Exception as e:
-          logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
-          img = beanaproblem(img, "Interlude: cartoon failed (PDL)")
-          success = False
-          time.sleep(10)
+
+    except Exception as e:
+        logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
+        img = beanaproblem(img, "Interlude: cartoon failed (PDL)")
+        success = False
+        time.sleep(10)
 
     return img, success
 
-
-import feedparser
-import requests
-from PIL import Image, ImageChops, ImageDraw, ImageFont
-from bs4 import BeautifulSoup
-import logging
-import time
-import random
 
 def autocrop(im):
     bg = Image.new(im.mode, im.size, 255)
