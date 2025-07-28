@@ -457,6 +457,72 @@ def newyorkercartoon(img, config):
 
     return img, success
 
+import feedparser
+import requests
+from PIL import Image, ImageChops, ImageDraw, ImageFont
+from bs4 import BeautifulSoup
+import logging
+import time
+import random
+
+def autocrop(im):
+    bg = Image.new(im.mode, im.size, 255)
+    diff = ImageChops.difference(im, bg)
+    bbox = diff.getbbox()
+    return im.crop(bbox) if bbox else im
+
+def newyorkercartoon(img, config):
+    try:
+        logging.info("Get a random Poorly Drawn Lines cartoon")
+
+        d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
+
+        # Shuffle entries to randomize
+        entries = list(d.entries)
+        random.shuffle(entries)
+
+        # Try each until one has an image
+        for entry in entries:
+            soup = BeautifulSoup(entry.description, "html.parser")
+            img_tag = soup.find("img")
+            if img_tag and "src" in img_tag.attrs:
+                img_url = img_tag["src"]
+                break
+        else:
+            raise ValueError("No image found in any feed entry")
+
+        # Download and convert
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
+        imframe = autocrop(imframe)
+        imframe = imframe.quantize(colors=16, method=Image.FASTOCTREE).convert("L")
+        imframe.thumbnail((1448, 1000), Image.BICUBIC)
+
+        # Center
+        imwidth, imheight = imframe.size
+        xvalue = (1448 - imwidth) // 2
+        yvalue = (1072 - imheight) // 2
+        img.paste(imframe, (xvalue, yvalue))
+
+        # Attribution
+        draw = ImageDraw.Draw(img)
+        attribution = "© Reza Farazmand"
+        fontsize = 24
+        try:
+            font = ImageFont.truetype("DejaVuSansMono.ttf", fontsize)
+        except IOError:
+            font = ImageFont.load_default()
+        textwidth, textheight = draw.textsize(attribution, font=font)
+        draw.text((1448 - textwidth - 20, 1072 - textheight - 10), attribution, fill=0, font=font)
+
+        success = True
+
+    except Exception as e:
+        logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
+        img = beanaproblem(img, "Interlude: cartoon failed (PDL)")
+        success = False
+        time.sleep(10)
+
+    return img, success
 
 
 def headlines(img, config):
