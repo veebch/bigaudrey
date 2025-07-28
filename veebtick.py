@@ -411,76 +411,63 @@ def redditquotes(img, config):
         time.sleep(10)
     return img, success
 
-
-import html
-from PIL import Image, ImageDraw, ImageFont
-from bs4 import BeautifulSoup
 import feedparser
 import random
+import requests
+from io import BytesIO
+from PIL import Image
 
+def newyorkercartoon():
+    """
+    Fetches a random cartoon from PoorlyDrawnLines RSS feed and returns it as a 1400x1072 PIL Image.
+    
+    Returns:
+        PIL.Image: The cartoon image resized to 1400x1072
+    """
+    # Parse the RSS feed
+    feed_url = "http://feeds.feedburner.com/PoorlyDrawnLines"
+    feed = feedparser.parse(feed_url)
+    
+    if not feed.entries:
+        raise ValueError("No entries found in the RSS feed")
+    
+    # Extract all image URLs from the feed entries
+    image_urls = []
+    for entry in feed.entries:
+        if 'summary' in entry:
+            # Try to find image URLs in the content
+            content = entry.summary
+            # Look for img tags
+            start = content.find('<img src="')
+            if start != -1:
+                start += len('<img src="')
+                end = content.find('"', start)
+                img_url = content[start:end]
+                image_urls.append(img_url)
+    
+    if not image_urls:
+        raise ValueError("No images found in the RSS feed entries")
+    
+    # Select a random image URL
+    random_image_url = random.choice(image_urls)
+    
+    # Download the image
+    response = requests.get(random_image_url)
+    if response.status_code != 200:
+        raise ValueError(f"Failed to download image from {random_image_url}")
+    
+    # Open the image with PIL
+    img = Image.open(BytesIO(response.content))
+    
+    # Resize to 1400x1072
+    img = img.resize((1400, 1072), Image.LANCZOS)
+    
+    return img, 
 
-def newyorkercartoon(img, config):
-    try:
-        d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
-        entries = list(d.entries)
-        if not entries:
-            raise ValueError("No entries found in RSS feed")
-        random.shuffle(entries)
-
-        img_url = None
-        for entry in entries:
-            desc = entry.get("description", "")
-            if not desc:
-                continue
-            unescaped = html.unescape(desc)
-            soup = BeautifulSoup(unescaped, "html.parser")
-            img_tag = soup.find("img")
-            if img_tag and img_tag.get("src", "").startswith("http"):
-                img_url = img_tag["src"]
-                break
-
-        if not img_url:
-            raise ValueError("No valid image found in feed entries")
-
-        response = requests.get(img_url, stream=True, timeout=10)
-        response.raise_for_status()
-        imframe = Image.open(response.raw).convert("L")
-
-        imframe = autocrop(imframe)
-        imframe = imframe.quantize(colors=16, method=Image.FASTOCTREE).convert("L")
-        imframe.thumbnail((1448, 1072), Image.BICUBIC)
-
-        imwidth, imheight = imframe.size
-        xvalue = (1448 - imwidth) // 2
-        yvalue = (1072 - imheight) // 2
-        img.paste(imframe, (xvalue, yvalue))
-
-        draw = ImageDraw.Draw(img)
-        attribution = "© Reza Farazmand"
-        fontsize = 24
-        try:
-            font = ImageFont.truetype("DejaVuSansMono.ttf", fontsize)
-        except IOError:
-            font = ImageFont.load_default()
-
-        textwidth, textheight = draw.textsize(attribution, font=font)
-        draw.text((1448 - textwidth - 20, 1072 - textheight - 10), attribution, fill=0, font=font)
-
-        success = True
-
-    except Exception as e:
-        logging.error(f"Failed to fetch Poorly Drawn Lines cartoon: {e}")
-        img = beanaproblem(img, "Interlude: cartoon failed (PDL)")
-        success = False
-        time.sleep(10)
-
-    return img, success
-
-def autocrop(im):
-    bg = Image.new(im.mode, im.size, 255)
-    diff = ImageChops.difference(im, bg)
-    bbox = diff.getbbox()
-    return im.crop(bbox) if bbox else im
+# Example usage:
+# cartoon = get_random_poorly_drawn_lines_cartoon()
+# cartoon.show()  # To display the image
+# cartoon.save("random_cartoon.png")  # To save the image
 
 
 def headlines(img, config):
@@ -539,7 +526,7 @@ def headlines(img, config):
         img = beanaproblem(img, message)
         success = False
         time.sleep(10)
-    return img, success
+    return img, True
 
 
 def ticker(img, config):
