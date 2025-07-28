@@ -417,7 +417,7 @@ import requests
 from io import BytesIO
 from PIL import Image
 
-def newyorkercartoon():
+def newyorkercartoon(img, config):
     """
     Fetches a random cartoon from PoorlyDrawnLines RSS feed and returns it as a 1400x1072 PIL Image.
     
