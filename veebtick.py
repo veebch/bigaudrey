@@ -526,7 +526,7 @@ def headlines(img, config):
         img = beanaproblem(img, message)
         success = False
         time.sleep(10)
-    return img, True
+    return img, success
 
 
 def ticker(img, config):
