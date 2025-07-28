@@ -429,7 +429,7 @@ def newyorkercartoon(img, config):
 
         # Download and resize image
         imframe = Image.open(requests.get(img_url, stream=True).raw)
-        resize = (1200, 800)
+        resize = (1448, 1000)
         imframe.thumbnail(resize, Image.BICUBIC)
         imwidth, imheight = imframe.size
         xvalue = (1448 - imwidth) // 2
@@ -437,7 +437,7 @@ def newyorkercartoon(img, config):
 
         # Render alt-text below image
         fontstring = "Forum-Regular"  # Adjust to legible e-paper font
-        y_text = 370
+        y_text = 270
         height = 50
         width = 50
         fontsize = 60
