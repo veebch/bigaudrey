@@ -10,7 +10,7 @@ Big Audrey fetches content tailored to your interests from the internet and disp
 - **Quotes** (from Reddit's [r/quotes](https://reddit.com/r/quotes))  
 - **Word of the Day** (from [Wordsmith.org](https://wordsmith.org))  
 - **Headlines** (from any RSS feed, with QR code links to articles)  
-- **Cartoons** (from *The New Yorker*)  
+- **Cartoons** (Poorly Drawn Lines by Reza Farazmand)  
 - **Stoic Quotes** (from [Stoic-Quotes.com](https://stoic-quotes.com))  
 
 ## Features  
