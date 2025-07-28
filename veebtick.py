@@ -413,39 +413,75 @@ def redditquotes(img, config):
 
 
 
+import feedparser
+import requests
+from PIL import Image
+from bs4 import BeautifulSoup
+import logging
+import time
+import textwrap
+
 def newyorkercartoon(img, config):
     try:
         logging.info("Get an XKCD cartoon")
-        
-        # Parse XKCD RSS feed
-        d = feedparser.parse("https://xkcd.com/rss.xml")
-        description_html = d.entries[0].description
 
-        # Extract image URL and alt-text from <description>
-        soup = BeautifulSoup(description_html, "html.parser")
+        # Fetch XKCD feed
+        d = feedparser.parse("https://xkcd.com/rss.xml")
+        soup = BeautifulSoup(d.entries[0].description, "html.parser")
         img_tag = soup.find("img")
         img_url = img_tag["src"]
         caption = img_tag["title"]
 
-        # Download and resize image
-        imframe = Image.open(requests.get(img_url, stream=True).raw)
-        resize = (1448, 1000)
-        imframe.thumbnail(resize, Image.BICUBIC)
-        imwidth, imheight = imframe.size
-        xvalue = (1448 - imwidth) // 2
-        img.paste(imframe, (xvalue, 75))
+        # === Layout Constants ===
+        DISPLAY_WIDTH = 1448
+        DISPLAY_HEIGHT = 1072
+        SIDE_MARGIN = 30
+        TOP_MARGIN = 30
+        BOTTOM_MARGIN = 30
+        FONTSTRING = "Forum-Regular"
+        FONTSIZE = 42
+        LINE_HEIGHT = 48
+        MAX_LINES = 5  # Adjust to control caption height
 
-        # Render alt-text below image
-        fontstring = "Forum-Regular"  # Adjust to legible e-paper font
-        y_text = 270
-        height = 50
-        width = 50
-        fontsize = 60
-        img, numline = writewrappedlines(
-            img, caption, fontsize, y_text, height, width, fontstring
+        # === Measure caption height ===
+        line_width_px = DISPLAY_WIDTH - 2 * SIDE_MARGIN
+        chars_per_line = int(line_width_px / (FONTSIZE * 0.55))  # Approx char width
+        wrapped = textwrap.wrap(caption, width=chars_per_line)
+        wrapped = wrapped[:MAX_LINES]
+        caption_height = LINE_HEIGHT * len(wrapped)
+
+        # === Calculate max image area ===
+        available_height = DISPLAY_HEIGHT - caption_height - TOP_MARGIN - BOTTOM_MARGIN - 20
+        max_image_size = (DISPLAY_WIDTH - 2 * SIDE_MARGIN, available_height)
+
+        # === Fetch & scale image ===
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
+        imframe.thumbnail(max_image_size, Image.BICUBIC)
+        imwidth, imheight = imframe.size
+        x_img = (DISPLAY_WIDTH - imwidth) // 2
+        y_img = TOP_MARGIN
+        img.paste(imframe, (x_img, y_img))
+
+        # === Draw caption ===
+        y_text = y_img + imheight + 20
+        x_text = SIDE_MARGIN
+
+        final_caption = "\n".join(wrapped)
+        img, _ = writewrappedlines(
+            img, final_caption, FONTSIZE, y_text, LINE_HEIGHT, x_text, FONTSTRING
         )
 
         success = True
+
+    except Exception as e:
+        logging.error(f"Failed to fetch XKCD: {e}")
+        message = "Interlude due to a data pull/print problem (XKCD)"
+        img = beanaproblem(img, message)
+        success = False
+        time.sleep(10)
+
+    return img, success
+
 
     except Exception as e:
         logging.error(f"Failed to fetch XKCD: {e}")
