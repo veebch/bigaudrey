@@ -5,7 +5,7 @@ function: # Functions that Audrey has, along with a weighting for each
     weight: 0
   - mode: wordaday
     weight: 0
-  - mode: newyorkercartoon
+  - mode: PDLcartoon
     weight: 0
   - mode: headlines
     weight: 0   
