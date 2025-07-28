@@ -412,27 +412,37 @@ def redditquotes(img, config):
     return img, success
 
 
-
-import feedparser
-import requests
 from PIL import Image
 from bs4 import BeautifulSoup
-import logging
-import time
 import textwrap
 
 def newyorkercartoon(img, config):
     try:
-        logging.info("Get an XKCD cartoon")
+        logging.info("Get a New Yorker cartoon")
 
-        # Fetch XKCD feed
-        d = feedparser.parse("https://xkcd.com/rss.xml")
-        soup = BeautifulSoup(d.entries[0].description, "html.parser")
-        img_tag = soup.find("img")
-        img_url = img_tag["src"]
-        caption = img_tag["title"]
+        # === Fetch cartoon feed ===
+        feed_url = "https://www.newyorker.com/feed/cartoons/daily-cartoon"
+        d = feedparser.parse(feed_url)
+        entry = d.entries[0]
+        page_url = entry.link
 
-        # === Layout Constants ===
+        # === Fetch cartoon page ===
+        page = requests.get(page_url, timeout=10)
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        # === Find image URL ===
+        figure = soup.find("figure")
+        img_tag = figure.find("img") if figure else None
+        img_url = img_tag["src"] if img_tag else None
+
+        # === Extract caption text ===
+        figcaption = figure.find("figcaption") if figure else None
+        caption = figcaption.get_text(strip=True) if figcaption else "Cartoon from The New Yorker"
+
+        if not img_url:
+            raise ValueError("Could not extract image URL from New Yorker page")
+
+        # === Layout constants ===
         DISPLAY_WIDTH = 1448
         DISPLAY_HEIGHT = 1072
         SIDE_MARGIN = 30
@@ -441,21 +451,19 @@ def newyorkercartoon(img, config):
         FONTSTRING = "Forum-Regular"
         FONTSIZE = 42
         LINE_HEIGHT = 48
-        MAX_LINES = 5  # Adjust to control caption height
+        MAX_LINES = 5  # cap max vertical caption space
 
-        # === Measure caption height ===
+        # === Estimate caption line count ===
         line_width_px = DISPLAY_WIDTH - 2 * SIDE_MARGIN
-        chars_per_line = int(line_width_px / (FONTSIZE * 0.55))  # Approx char width
+        chars_per_line = int(line_width_px / (FONTSIZE * 0.55))
         wrapped = textwrap.wrap(caption, width=chars_per_line)
         wrapped = wrapped[:MAX_LINES]
         caption_height = LINE_HEIGHT * len(wrapped)
 
-        # === Calculate max image area ===
+        # === Fetch and scale image ===
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
         available_height = DISPLAY_HEIGHT - caption_height - TOP_MARGIN - BOTTOM_MARGIN - 20
         max_image_size = (DISPLAY_WIDTH - 2 * SIDE_MARGIN, available_height)
-
-        # === Fetch & scale image ===
-        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
         imframe.thumbnail(max_image_size, Image.BICUBIC)
         imwidth, imheight = imframe.size
         x_img = (DISPLAY_WIDTH - imwidth) // 2
@@ -465,8 +473,8 @@ def newyorkercartoon(img, config):
         # === Draw caption ===
         y_text = y_img + imheight + 20
         x_text = SIDE_MARGIN
-
         final_caption = "\n".join(wrapped)
+
         img, _ = writewrappedlines(
             img, final_caption, FONTSIZE, y_text, LINE_HEIGHT, x_text, FONTSTRING
         )
@@ -474,24 +482,13 @@ def newyorkercartoon(img, config):
         success = True
 
     except Exception as e:
-        logging.error(f"Failed to fetch XKCD: {e}")
-        message = "Interlude due to a data pull/print problem (XKCD)"
+        logging.error(f"New Yorker cartoon fetch failed: {e}")
+        message = "Interlude due to a data pull/print problem (New Yorker)"
         img = beanaproblem(img, message)
         success = False
         time.sleep(10)
 
     return img, success
-
-
-    except Exception as e:
-        logging.error(f"Failed to fetch XKCD: {e}")
-        message = "Interlude due to a data pull/print problem (XKCD)"
-        img = beanaproblem(img, message)
-        success = False
-        time.sleep(10)
-
-    return img, success
-
 
 
 def headlines(img, config):
