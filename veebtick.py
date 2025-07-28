@@ -411,24 +411,27 @@ def redditquotes(img, config):
         time.sleep(10)
     return img, success
 
-import logging
-import random
-import time
-import feedparser
+
 import html
-import requests
 from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
+import feedparser
+import random
+
 
 def newyorkercartoon(img, config):
     try:
         d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
         entries = list(d.entries)
+        if not entries:
+            raise ValueError("No entries found in RSS feed")
         random.shuffle(entries)
 
         img_url = None
         for entry in entries:
             desc = entry.get("description", "")
+            if not desc:
+                continue
             unescaped = html.unescape(desc)
             soup = BeautifulSoup(unescaped, "html.parser")
             img_tag = soup.find("img")
@@ -439,19 +442,19 @@ def newyorkercartoon(img, config):
         if not img_url:
             raise ValueError("No valid image found in feed entries")
 
-        # Download and convert
-        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
+        response = requests.get(img_url, stream=True, timeout=10)
+        response.raise_for_status()
+        imframe = Image.open(response.raw).convert("L")
+
         imframe = autocrop(imframe)
         imframe = imframe.quantize(colors=16, method=Image.FASTOCTREE).convert("L")
         imframe.thumbnail((1448, 1072), Image.BICUBIC)
 
-        # Center
         imwidth, imheight = imframe.size
         xvalue = (1448 - imwidth) // 2
         yvalue = (1072 - imheight) // 2
         img.paste(imframe, (xvalue, yvalue))
 
-        # Attribution
         draw = ImageDraw.Draw(img)
         attribution = "© Reza Farazmand"
         fontsize = 24
@@ -466,13 +469,12 @@ def newyorkercartoon(img, config):
         success = True
 
     except Exception as e:
-        logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
+        logging.error(f"Failed to fetch Poorly Drawn Lines cartoon: {e}")
         img = beanaproblem(img, "Interlude: cartoon failed (PDL)")
         success = False
         time.sleep(10)
 
     return img, success
-
 
 def autocrop(im):
     bg = Image.new(im.mode, im.size, 255)
