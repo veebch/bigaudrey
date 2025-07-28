@@ -414,76 +414,37 @@ def redditquotes(img, config):
 
 from PIL import Image
 from bs4 import BeautifulSoup
-import textwrap
+
 
 def newyorkercartoon(img, config):
     try:
-        logging.info("Get a New Yorker cartoon")
+        logging.info("Get a Poorly Drawn Lines cartoon")
 
-        # === Fetch cartoon feed ===
-        feed_url = "https://www.newyorker.com/feed/cartoons/daily-cartoon"
-        d = feedparser.parse(feed_url)
-        entry = d.entries[0]
-        page_url = entry.link
+        # Parse RSS feed
+        d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
+        description_html = d.entries[0].description
 
-        # === Fetch cartoon page ===
-        page = requests.get(page_url, timeout=10)
-        soup = BeautifulSoup(page.text, "html.parser")
+        # Extract image URL from <description>
+        soup = BeautifulSoup(description_html, "html.parser")
+        img_tag = soup.find("img")
+        img_url = img_tag["src"]
 
-        # === Find image URL ===
-        figure = soup.find("figure")
-        img_tag = figure.find("img") if figure else None
-        img_url = img_tag["src"] if img_tag else None
+        # Download and convert image
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")  # Convert to 8-bit grayscale
+        resize = (1448, 1000)  # Conservative height to leave margin
+        imframe.thumbnail(resize, Image.BICUBIC)
 
-        # === Extract caption text ===
-        figcaption = figure.find("figcaption") if figure else None
-        caption = figcaption.get_text(strip=True) if figcaption else "Cartoon from The New Yorker"
-
-        if not img_url:
-            raise ValueError("Could not extract image URL from New Yorker page")
-
-        # === Layout constants ===
-        DISPLAY_WIDTH = 1448
-        DISPLAY_HEIGHT = 1072
-        SIDE_MARGIN = 30
-        TOP_MARGIN = 30
-        BOTTOM_MARGIN = 30
-        FONTSTRING = "Forum-Regular"
-        FONTSIZE = 42
-        LINE_HEIGHT = 48
-        MAX_LINES = 5  # cap max vertical caption space
-
-        # === Estimate caption line count ===
-        line_width_px = DISPLAY_WIDTH - 2 * SIDE_MARGIN
-        chars_per_line = int(line_width_px / (FONTSIZE * 0.55))
-        wrapped = textwrap.wrap(caption, width=chars_per_line)
-        wrapped = wrapped[:MAX_LINES]
-        caption_height = LINE_HEIGHT * len(wrapped)
-
-        # === Fetch and scale image ===
-        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
-        available_height = DISPLAY_HEIGHT - caption_height - TOP_MARGIN - BOTTOM_MARGIN - 20
-        max_image_size = (DISPLAY_WIDTH - 2 * SIDE_MARGIN, available_height)
-        imframe.thumbnail(max_image_size, Image.BICUBIC)
+        # Center on screen
         imwidth, imheight = imframe.size
-        x_img = (DISPLAY_WIDTH - imwidth) // 2
-        y_img = TOP_MARGIN
-        img.paste(imframe, (x_img, y_img))
-
-        # === Draw caption ===
-        y_text = y_img + imheight + 20
-        x_text = SIDE_MARGIN
-        final_caption = "\n".join(wrapped)
-
-        img, _ = writewrappedlines(
-            img, final_caption, FONTSIZE, y_text, LINE_HEIGHT, x_text, FONTSTRING
-        )
+        xvalue = (1448 - imwidth) // 2
+        yvalue = (1072 - imheight) // 2
+        img.paste(imframe, (xvalue, yvalue))
 
         success = True
 
     except Exception as e:
-        logging.error(f"New Yorker cartoon fetch failed: {e}")
-        message = "Interlude due to a data pull/print problem (New Yorker)"
+        logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
+        message = "Interlude due to a data pull/print problem (PDL)"
         img = beanaproblem(img, message)
         success = False
         time.sleep(10)
