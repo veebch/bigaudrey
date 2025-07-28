@@ -418,78 +418,23 @@ from bs4 import BeautifulSoup
 
 def newyorkercartoon(img, config):
     try:
-        logging.info("Get a Poorly Drawn Lines cartoon")
+        logging.info("Get a random Poorly Drawn Lines cartoon")
 
-        # Parse the RSS feed
         d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
+        entries = list(d.entries)
+        random.shuffle(entries)
 
-        # Loop to find the first entry with an <img> tag
         img_url = None
-        for entry in d.entries:
-            soup = BeautifulSoup(entry.description, "html.parser")
+        for entry in entries:
+            desc = entry.get("description", "")
+            soup = BeautifulSoup(desc, "html.parser")
             img_tag = soup.find("img")
-            if img_tag and "src" in img_tag.attrs:
+            if img_tag and img_tag.get("src", "").startswith("http"):
                 img_url = img_tag["src"]
                 break
 
         if not img_url:
-            raise ValueError("No image found in any feed entry")
-
-        # Download and convert image to grayscale (8-bit)
-        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
-        resize = (1448, 1072)  
-        imframe.thumbnail(resize, Image.BICUBIC)
-
-        # Center image on Waveshare 6" HD display (1448x1072)
-        imwidth, imheight = imframe.size
-        xvalue = (1448 - imwidth) // 2
-        yvalue = (1072 - imheight) // 2
-        img.paste(imframe, (xvalue, yvalue))
-
-        success = True
-
-    except Exception as e:
-        logging.error(f"Failed to fetch Poorly Drawn Lines: {e}")
-        message = "Interlude due to a data pull/print problem (PDL)"
-        img = beanaproblem(img, message)
-        success = False
-        time.sleep(10)
-
-    return img, success
-
-import feedparser
-import requests
-from PIL import Image, ImageChops, ImageDraw, ImageFont
-from bs4 import BeautifulSoup
-import logging
-import time
-import random
-
-def autocrop(im):
-    bg = Image.new(im.mode, im.size, 255)
-    diff = ImageChops.difference(im, bg)
-    bbox = diff.getbbox()
-    return im.crop(bbox) if bbox else im
-
-def newyorkercartoon(img, config):
-    try:
-        logging.info("Get a random Poorly Drawn Lines cartoon")
-
-        d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
-
-        # Shuffle entries to randomize
-        entries = list(d.entries)
-        random.shuffle(entries)
-
-        # Try each until one has an image
-        for entry in entries:
-            soup = BeautifulSoup(entry.description, "html.parser")
-            img_tag = soup.find("img")
-            if img_tag and "src" in img_tag.attrs:
-                img_url = img_tag["src"]
-                break
-        else:
-            raise ValueError("No image found in any feed entry")
+            raise ValueError("No valid image found in feed entries")
 
         # Download and convert
         imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
@@ -523,6 +468,21 @@ def newyorkercartoon(img, config):
         time.sleep(10)
 
     return img, success
+
+
+import feedparser
+import requests
+from PIL import Image, ImageChops, ImageDraw, ImageFont
+from bs4 import BeautifulSoup
+import logging
+import time
+import random
+
+def autocrop(im):
+    bg = Image.new(im.mode, im.size, 255)
+    diff = ImageChops.difference(im, bg)
+    bbox = diff.getbbox()
+    return im.crop(bbox) if bbox else im
 
 
 def headlines(img, config):
