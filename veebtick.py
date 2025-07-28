@@ -417,17 +417,16 @@ import requests
 from io import BytesIO
 from PIL import Image, ImageOps
 
-def newyorkercartoon(img=None, config=None):
+def PDLcartoon(img=None, config=None):
     """
-    Fetches a random cartoon from PoorlyDrawnLines and returns it as a padded 1400x1072 image
-    maintaining original aspect ratio.
+    Fetches a random cartoon from PoorlyDrawnLines with 50px padding.
     
     Args:
         img: Ignored (maintained for compatibility)
         config: Ignored (maintained for compatibility)
     
     Returns:
-        tuple: (PIL.Image, bool) - The padded image and success status (always True unless error occurs)
+        tuple: (PIL.Image, bool) - The padded image and success status
     """
     try:
         # Parse the RSS feed
@@ -436,7 +435,7 @@ def newyorkercartoon(img=None, config=None):
         if not feed.entries:
             raise ValueError("No comics found in the RSS feed")
 
-        # Extract all image URLs from content
+        # Extract image URLs
         image_urls = []
         for entry in feed.entries:
             if hasattr(entry, 'content'):
@@ -449,9 +448,9 @@ def newyorkercartoon(img=None, config=None):
                         image_urls.append(html[src_start:src_end])
 
         if not image_urls:
-            raise ValueError("No image URLs found in feed content")
+            raise ValueError("No image URLs found")
 
-        # Fetch random image
+        # Get random image
         image_url = random.choice(image_urls)
         response = requests.get(image_url, timeout=10)
         response.raise_for_status()
@@ -461,20 +460,24 @@ def newyorkercartoon(img=None, config=None):
         if img.mode != 'RGB':
             img = img.convert('RGB')
         
-        # Calculate aspect ratio preserving dimensions
-        target_w, target_h = 1400, 1072
+        # Calculate dimensions with 50px padding
+        padding = 50
+        max_width = 1400 - (2 * padding)
+        max_height = 1072 - (2 * padding)
+        
+        # Calculate aspect ratio preserving size
         original_w, original_h = img.size
-        ratio = min(target_w/original_w, target_h/original_h)
+        ratio = min(max_width/original_w, max_height/original_h)
         new_w = int(original_w * ratio)
         new_h = int(original_h * ratio)
         
         # Resize maintaining aspect ratio
         img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         
-        # Create new image with white background
-        padded_img = Image.new('RGB', (target_w, target_h), (255, 255, 255))
-        x_offset = (target_w - new_w) // 2
-        y_offset = (target_h - new_h) // 2
+        # Create new image with white background and padding
+        padded_img = Image.new('RGB', (1400, 1072), (255, 255, 255))
+        x_offset = (1400 - new_w) // 2
+        y_offset = (1072 - new_h) // 2
         padded_img.paste(img, (x_offset, y_offset))
         
         return padded_img, True
@@ -482,12 +485,6 @@ def newyorkercartoon(img=None, config=None):
     except Exception as e:
         print(f"Error fetching cartoon: {str(e)}")
         return None, False
-
-# Example usage:
-# cartoon, success = poorly_drawn_lines_cartoon()
-# if success:
-#     cartoon.show()
-#     cartoon.save("cartoon.jpg", quality=95)
 
 def headlines(img, config):
     try:
