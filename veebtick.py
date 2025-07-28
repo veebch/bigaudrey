@@ -420,21 +420,27 @@ def newyorkercartoon(img, config):
     try:
         logging.info("Get a Poorly Drawn Lines cartoon")
 
-        # Parse RSS feed
+        # Parse the RSS feed
         d = feedparser.parse("http://feeds.feedburner.com/PoorlyDrawnLines")
-        description_html = d.entries[0].description
 
-        # Extract image URL from <description>
-        soup = BeautifulSoup(description_html, "html.parser")
-        img_tag = soup.find("img")
-        img_url = img_tag["src"]
+        # Loop to find the first entry with an <img> tag
+        img_url = None
+        for entry in d.entries:
+            soup = BeautifulSoup(entry.description, "html.parser")
+            img_tag = soup.find("img")
+            if img_tag and "src" in img_tag.attrs:
+                img_url = img_tag["src"]
+                break
 
-        # Download and convert image
-        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")  # Convert to 8-bit grayscale
-        resize = (1448, 1000)  # Conservative height to leave margin
+        if not img_url:
+            raise ValueError("No image found in any feed entry")
+
+        # Download and convert image to grayscale (8-bit)
+        imframe = Image.open(requests.get(img_url, stream=True).raw).convert("L")
+        resize = (1448, 1072)  
         imframe.thumbnail(resize, Image.BICUBIC)
 
-        # Center on screen
+        # Center image on Waveshare 6" HD display (1448x1072)
         imwidth, imheight = imframe.size
         xvalue = (1448 - imwidth) // 2
         yvalue = (1072 - imheight) // 2
@@ -450,6 +456,7 @@ def newyorkercartoon(img, config):
         time.sleep(10)
 
     return img, success
+
 
 
 def headlines(img, config):
