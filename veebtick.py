@@ -412,48 +412,37 @@ def redditquotes(img, config):
     return img, success
 
 
+
 def newyorkercartoon(img, config):
     try:
         logging.info("Get an XKCD cartoon")
         
-        # Parse XKCD feed
+        # Parse XKCD RSS feed
         d = feedparser.parse("https://xkcd.com/rss.xml")
-        soup = BeautifulSoup(d.entries[0].description, "html.parser")
-        img_tag = soup.find("img")
+        description_html = d.entries[0].description
 
+        # Extract image URL and alt-text from <description>
+        soup = BeautifulSoup(description_html, "html.parser")
+        img_tag = soup.find("img")
         img_url = img_tag["src"]
         caption = img_tag["title"]
 
-        # Download image
+        # Download and resize image
         imframe = Image.open(requests.get(img_url, stream=True).raw)
-
-        # Layout constants
-        DISPLAY_WIDTH = 1448
-        DISPLAY_HEIGHT = 1072
-        TOP_MARGIN = 30
-        SIDE_MARGIN = 30
-        BOTTOM_MARGIN = 30
-        CAPTION_HEIGHT = 200  # Reserve space for alt-text
-        MAX_IMG_HEIGHT = DISPLAY_HEIGHT - CAPTION_HEIGHT - TOP_MARGIN - BOTTOM_MARGIN
-        MAX_IMG_WIDTH = DISPLAY_WIDTH - 2 * SIDE_MARGIN
-
-        # Resize to fit within max area
-        imframe.thumbnail((MAX_IMG_WIDTH, MAX_IMG_HEIGHT), Image.BICUBIC)
+        resize = (1200, 800)
+        imframe.thumbnail(resize, Image.BICUBIC)
         imwidth, imheight = imframe.size
-        xpos = (DISPLAY_WIDTH - imwidth) // 2
-        ypos = TOP_MARGIN
-        img.paste(imframe, (xpos, ypos))
+        xvalue = (1448 - imwidth) // 2
+        img.paste(imframe, (xvalue, 75))
 
-        # Caption rendering
-        fontsize = 42
-        fontstring = "Forum-Regular"  # Swap with a known-good e-paper font if needed
-        caption_y = ypos + imheight + 30  # spacing below image
-        text_x = SIDE_MARGIN
-        text_y = caption_y
-        line_height = 50
-
-        img, _ = writewrappedlines(
-            img, caption, fontsize, text_y, line_height, text_x, fontstring
+        # Render alt-text below image
+        fontstring = "Forum-Regular"  # Adjust to legible e-paper font
+        y_text = 370
+        height = 50
+        width = 50
+        fontsize = 60
+        img, numline = writewrappedlines(
+            img, caption, fontsize, y_text, height, width, fontstring
         )
 
         success = True
