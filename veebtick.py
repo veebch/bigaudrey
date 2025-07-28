@@ -417,12 +417,12 @@ import requests
 from io import BytesIO
 from PIL import Image
 
-def newyorkercartoon(img, config):
+def newyorkercartoon(img=None, config=None):
     """
     Fetches a random cartoon from PoorlyDrawnLines RSS feed and returns it as a 1400x1072 PIL Image.
     
     Returns:
-        PIL.Image: The cartoon image resized to 1400x1072
+        tuple: (PIL.Image, bool) - The cartoon image resized to 1400x1072 and success status
     """
     # Parse the RSS feed
     feed_url = "http://feeds.feedburner.com/PoorlyDrawnLines"
@@ -434,16 +434,16 @@ def newyorkercartoon(img, config):
     # Extract all image URLs from the feed entries
     image_urls = []
     for entry in feed.entries:
-        if 'summary' in entry:
-            # Try to find image URLs in the content
-            content = entry.summary
-            # Look for img tags
-            start = content.find('<img src="')
-            if start != -1:
-                start += len('<img src="')
-                end = content.find('"', start)
-                img_url = content[start:end]
-                image_urls.append(img_url)
+        if 'content' in entry:
+            for content in entry.content:
+                if content.type == 'text/html':
+                    # Find the start of the image URL
+                    start = content.value.find('src="https://poorlydrawnlines.com/wp-content/uploads/')
+                    if start != -1:
+                        start += len('src="')
+                        end = content.value.find('"', start)
+                        img_url = content.value[start:end]
+                        image_urls.append(img_url)
     
     if not image_urls:
         raise ValueError("No images found in the RSS feed entries")
@@ -452,22 +452,24 @@ def newyorkercartoon(img, config):
     random_image_url = random.choice(image_urls)
     
     # Download the image
-    response = requests.get(random_image_url)
-    if response.status_code != 200:
-        raise ValueError(f"Failed to download image from {random_image_url}")
-    
-    # Open the image with PIL
-    img = Image.open(BytesIO(response.content))
-    
-    # Resize to 1400x1072
-    img = img.resize((1400, 1072), Image.LANCZOS)
-    
-    return img, True
-
-# Example usage:
-# cartoon = get_random_poorly_drawn_lines_cartoon()
-# cartoon.show()  # To display the image
-# cartoon.save("random_cartoon.png")  # To save the image
+    try:
+        response = requests.get(random_image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Open the image with PIL
+        img = Image.open(BytesIO(response.content))
+        
+        # Convert to RGB if necessary (for JPEG compatibility)
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+        
+        # Resize to 1400x1072
+        img = img.resize((1400, 1072), Image.LANCZOS)
+        
+        return img, True
+        
+    except Exception as e:
+        raise ValueError(f"Failed to process image from {random_image_url}: {str(e)}")
 
 
 def headlines(img, config):
