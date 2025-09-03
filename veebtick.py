@@ -871,7 +871,9 @@ def updateDisplay(image, config, allprices, volumes):
         logging.info(str("Price: " + key))
         pricenow = allprices[key][-1]  # Get latest close price
         fiat = fiat_list[index]
-        if fiat == "jpy":
+        if fiat == "points:
+            symbolstring = " "
+        elif fiat == "jpy":
             symbolstring = "¥"
         else:
             symbolstring = currency.symbol(fiat.upper())
