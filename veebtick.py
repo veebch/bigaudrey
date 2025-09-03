@@ -941,7 +941,10 @@ def updateDisplay(image, config, allprices, volumes):
             fontstring=fontprice,
         )
         vol = human_format(volumes[key])
-        text = pricechange + " vol:" + vol
+        if vol != "0":
+          text = pricechange + " vol:" + vol
+        else: 
+          text = pricechange
         _place_text(
             image,
             text,
