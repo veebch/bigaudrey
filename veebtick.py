@@ -532,7 +532,7 @@ def headlines(img, config):
         )
         qr.add_data(urlstring)
         qr.make(fit=True)
-        theqr = qr.make_image(fill_color="#FFFFFF", back_color="#000000")
+        theqr = qr.make_image(fill_color="#FFFFFF", back_color="#000000").get_image()
         MAX_SIZE = (130, 130)
         theqr.thumbnail(MAX_SIZE)
         img.paste(theqr, (1200, 870))
