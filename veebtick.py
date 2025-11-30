@@ -534,7 +534,6 @@ def headlines(img, config):
         )
         qr.add_data(urlstring)
         qr.make(fit=True)
-        print('made qr code')
         theqr = qr.make_image(fill_color="#FFFFFF", back_color="#000000").get_image()
         MAX_SIZE = (130, 130)
         theqr.thumbnail(MAX_SIZE)
@@ -741,8 +740,7 @@ def create_all_prices_dataframe(data_with_live_prices, label, target_length=720)
 
 def getData(config):
     """
-    The function to grab the data. To avoid API limits we are using yfinance. This data is for personal use only. 
-    """
+    The function to grab the data. To avoid API limits we are using yfinance. This data is for personal use only. """
     crypto_list = currencystringtolist(config["ticker"]["symbol"])
     logging.info("Getting Data")
     interval = '1h'  # Interval for historical data
