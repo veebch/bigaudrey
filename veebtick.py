@@ -515,6 +515,7 @@ def headlines(img, config):
         img.paste(imlogo, (70, 50))
         # img.paste(imlogoaud,(100, 760))
         text = d.entries[0].title
+        print(text)
         fontstring = "Merriweather-Light"
         y_text = -230
         height = 120
@@ -524,6 +525,7 @@ def headlines(img, config):
             img, text, fontsize, y_text, height, width, fontstring
         )
         urlstring = d.entries[0].link
+        print(urlstring)
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -532,10 +534,13 @@ def headlines(img, config):
         )
         qr.add_data(urlstring)
         qr.make(fit=True)
-        theqr = qr.make_image(fill_color="#FFFFFF", back_color="#000000")
+        print('made qr code')
+        theqr = qr.make_image(fill_color="#FFFFFF", back_color="#000000").get_image()
         MAX_SIZE = (130, 130)
         theqr.thumbnail(MAX_SIZE)
+        print('made qr image')
         img.paste(theqr, (1200, 870))
+        print('pasted in')
         success = True
     except Exception as e:
         message = "Interlude due to a data pull/print problem (Headlines)"
@@ -631,66 +636,69 @@ def beanaproblem(image, message):
     return image
 
 
+
 def get_historical_and_live_data(symbols, interval='1h', period='1mo'):
     """
-    Fetch historical data for a list of symbols with the given interval and period,
-    and append the latest live price with timezone consistency.
+    Fetch a month of historical data for a list of symbols and append the latest live price.
 
     Args:
-        symbols (list): List of stock symbols to fetch data for.
-        interval (str): Data interval (e.g., '1d', '1h', '30m', etc.).
-        period (str): Data period (e.g., '5d', '7d', '1mo').
+        symbols (list): List of stock or crypto symbols.
+        interval (str): Data interval ('1h', '1d', etc.).
+        period (str): Data period (e.g., '1mo').
 
     Returns:
-        dict: A dictionary where keys are symbols and values are DataFrames with historical + live prices.
+        dict: Keys are symbols, values are DataFrames with historical + live prices.
     """
     data_with_live_prices = {}
+    print("DEBUG symbols:", symbols)
 
     for symbol in symbols:
         try:
-            # Get historical data
             ticker = yf.Ticker(symbol)
+
+            # Get historical data
             data = ticker.history(period=period, interval=interval)
 
-            if not data.empty:
-                # Ensure the live price retrieval is robust
-                live_price = ticker.info.get('regularMarketPrice')
-                live_volume = ticker.history(period="1d", interval="1m")['Volume'].dropna().iloc[-1]
-                if live_price is None:  # Fallback method
-                    print('FALLBACK')
-                    live_price = ticker.info.get('previousClose')
-                    
-                print(f"Live price for {symbol}: {live_price}")  # Debugging trace
+            # Fallback for crypto: hourly 1mo data sometimes empty, use daily
+            if data.empty and "-USD" in symbol:
+                print(f"No data for {symbol} at interval '{interval}', retrying with daily")
+                data = ticker.history(period=period, interval="1d")
 
-                if live_price is not None:
-                    # Get the timezone from historical data
-                    tz = data.index.tz
-
-                    # Create a timezone-aware timestamp
-                    live_timestamp = pd.Timestamp.now(tz=tz)
-
-                    # Create a DataFrame for the live price
-                    live_data = pd.DataFrame({
-                        'Open': [None],  
-                        'High': [None],  
-                        'Low': [None],   
-                        'Close': [live_price],  
-                        'Volume': [live_volume]  
-                    }, index=[live_timestamp])  
-
-                    # Append live data to the historical DataFrame
-                    data = pd.concat([data, live_data])
-            
-                data_with_live_prices[symbol] = data
-                print(data_with_live_prices[symbol]['Close'].iloc[-1])
-            else:
-                print(f"No data returned for {symbol}. Check the symbol or date range.")
+            if data.empty:
+                print(f"No historical data returned for {symbol}.")
                 data_with_live_prices[symbol] = pd.DataFrame()
+                continue
+
+            # Append latest live price
+            try:
+                live_price = ticker.fast_info.get("last_price")
+            except Exception:
+                live_price = None
+
+            if live_price is not None:
+                tz = data.index.tz
+                live_timestamp = pd.Timestamp.now(tz=tz)
+                live_volume = data['Volume'].iloc[-1] if 'Volume' in data.columns else None
+
+                live_data = pd.DataFrame({
+                    'Open': [None],
+                    'High': [None],
+                    'Low': [None],
+                    'Close': [live_price],
+                    'Volume': [live_volume]
+                }, index=[live_timestamp])
+
+                data = pd.concat([data, live_data])
+
+            data_with_live_prices[symbol] = data
+            print(f"{symbol} latest close: {data['Close'].iloc[-1]}")
+
         except Exception as e:
             print(f"Error fetching data for {symbol}: {e}")
             data_with_live_prices[symbol] = pd.DataFrame()
 
     return data_with_live_prices
+
   
 
 def create_all_prices_dataframe(data_with_live_prices, label, target_length=720):
